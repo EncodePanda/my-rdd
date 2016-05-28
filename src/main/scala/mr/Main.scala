@@ -12,11 +12,20 @@ object Main extends App {
     .setMaster("local[*]")
   val sc = new SparkContext(sparkConf)
 
+  // random ints
   sc.random[Int]()
     .map(_ + 1)
     .filter(_ > 50)
     .take(5)
     .foreach(println)
+
+  // random strings
+  sc.random[String]()
+    .map(_ + "!")
+    .filter(_.size > 70)
+    .take(5)
+    .foreach(println)
+
 
   sc.stop()
 }
