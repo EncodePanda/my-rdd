@@ -9,8 +9,11 @@ object Main extends App {
     .setMaster("local[*]")
   val sc = new SparkContext(sparkConf)
 
-  new RandomRDD(sc, 10).collect.foreach(println)
-
+  new RandomRDD(sc)
+    .map(_ + 1)
+    .filter(_ > 50)
+    .collect
+    .foreach(println)
 
   sc.stop()
 }

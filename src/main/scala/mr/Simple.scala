@@ -6,18 +6,14 @@ import org.apache.spark._
 import scala.reflect.ClassTag
 import scala.util.Random
 
-// trait Next[U] {
-  // def next: U
-// }
-
-class RandomRDD(_sc: SparkContext, numberOfPartitions: Int) extends RDD[Int](_sc, Nil) {
+class RandomRDD(_sc: SparkContext, maxSize: Int = 100, numOfPartitions: Int = 2) extends RDD[Int](_sc, Nil) {
 
   override def compute(split: Partition, context: TaskContext): Iterator[Int] =
-    (1 to Random.nextInt(100)).toList.toIterator
+    (1 to Random.nextInt(maxSize / numOfPartitions)).toList.toIterator
 
   override protected def getPartitions: Array[Partition] = {
-    val array = new Array[Partition](numberOfPartitions)
-    for (i <- 0 until numberOfPartitions) {
+    val array = new Array[Partition](numOfPartitions)
+    for (i <- 0 until numOfPartitions) {
       array(i) = new RandomPartition(i)
     }
     array
