@@ -1,14 +1,15 @@
 package mr
 
+import org.apache.spark._
 import scala.concurrent.Await
 import slick.driver.H2Driver.api._
 import slick.lifted.Tag
 import scala.concurrent.duration._
 
 object SchemaDef {
-  case class Users(tag: Tag) extends Table[(Int, String, Int)](tag, "users") {
+  case class Users(tag: Tag) extends Table[(Long, String, Int)](tag, "users") {
 
-    def id = column[Int]("id", O.PrimaryKey)
+    def id = column[Long]("id", O.PrimaryKey)
     def name = column[String]("name")
     def age = column[Int]("age")
 
@@ -20,12 +21,15 @@ object SchemaDef {
 }
 
 object MainSlick extends App {
+  import SchemaDef._
+
+  implicit val usersId = new Id[Users] {
+    def within(user: Users): Rep[Long] = user.id
+   }
 
   val db = Database.forConfig("h2mem1")
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  import SchemaDef._
 
   val populate = DBIO.seq(
     users += ((1, "jimmy", 28)),
@@ -42,17 +46,23 @@ object MainSlick extends App {
   val setup = for {
     _ <- users.schema.create
     _ <- populate
-    
+
   } yield ()
 
   Await.result(db.run(setup), 3 seconds)
 
-  val action = users.filter(user => user.id >= 2 && user.id <= 6).result
+  val sparkConf = new SparkConf()
+    .setAppName(this.getClass.getName)
+    .setMaster("local[*]")
+  val sc = new SparkContext(sparkConf)
 
-  val result = Await.result(db.run(action), 3 seconds)
+  new SLickRDD(sc, db, users, 2, 6, 2).collect().foreach(print)
 
-  result.foreach(println)
+  // val result = Await.result(db.run(action), 3 seconds)
+
+  // result.foreach(println)
 
   db.close
+  sc.stop()
 
 }
