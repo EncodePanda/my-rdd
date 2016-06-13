@@ -17,15 +17,19 @@ object Main extends App {
     .map(_ + 1)
     .filter(_ > 50)
     .take(5)
-    .foreach(println)
+    // .foreach(println)
 
   // random strings
   sc.random[String]()
     .map(_ + "!")
     .filter(_.size > 70)
     .take(5)
-    .foreach(println)
+    // .foreach(println)
 
+  import CensorshipRDD._
+
+  sc.parallelize(List("something", "Hadoop", "else"))
+    .censor().collect().foreach(println)
 
   sc.stop()
 }
