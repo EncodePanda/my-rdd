@@ -23,9 +23,9 @@ object SchemaDef {
 object MainSlick extends App {
   import SchemaDef._
 
-  implicit val usersId = new Id[Users] {
-    def within(user: Users): Rep[Long] = user.id
-   }
+  // implicit val usersId = new Id[Users] {
+    // def within(user: Users): Rep[Long] = user.id
+   // }
 
   val db = Database.forConfig("h2mem1")
 
@@ -56,7 +56,7 @@ object MainSlick extends App {
     .setMaster("local[*]")
   val sc = new SparkContext(sparkConf)
 
-  new SLickRDD(sc, db, users, 2, 6, 2).collect().foreach(print)
+  // new SLickRDD(sc, db, users, 2, 6, 2).collect().foreach(print)
 
   // val result = Await.result(db.run(action), 3 seconds)
 
